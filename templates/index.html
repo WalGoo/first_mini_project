@@ -108,9 +108,9 @@
         // 내부 데이터 불러오기
         function uSanSo_list_up() {
             $.ajax({
-                type: "GET",
-                url: "/givemethat/uSanSo",
-                data: {},
+                type: "POST",
+                url: "/givemethat",
+                data: {exer_type_give: $('#BigSegment').val()},
                 success: function (response) {
                     let uSanSo_list = response['uSanSo'];
                     for (let i = 0; i < uSanSo_list.length; i++) {
@@ -123,9 +123,9 @@
 
         function health_list_up() {
             $.ajax({
-                type: "GET",
-                url: "/givemethat/health",
-                data: {},
+                type: "POST",
+                url: "/givemethat",
+                data: {exer_type_give: $('#BigSegment').val()},
                 success: function (response) {
                     let health_list = response['health'];
                     for (let i = 0; i < health_list.length; i++) {
