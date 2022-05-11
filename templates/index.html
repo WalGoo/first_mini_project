@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Bulma 쓰는 법 연습하기</title>
+
+    <!-- Bulma CSS 링크 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+          crossorigin="anonymous">
+
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+
+    <style>
+        .level-item {
+            width: 95%;
+            max-width: 200px;
+            height: 95%;
+            max-height: 200px;
+            margin: auto 200px auto 400px;
+        }
+
+        .section {
+            width: 600px;
+            max-width: 100vw;
+            margin: auto auto 50px auto;
+            box-shadow: 0px 0px 3px 0px gray;
+        }
+
+        .button {
+            display: block;
+            margin: 10px auto;
+        }
+
+        .main_post {
+            width: 600px;
+            max-width: 100vw;
+            margin: auto auto 50px auto;
+            box-shadow: 0px 0px 3px 0px gray;
+            padding-top: 50px;
+            padding-bottom: 50px;
+        }
+
+        .form-group {
+            margin: 10px auto;
+            width: 300px;
+        }
+
+        .input {
+            display: block;
+            margin: 50px auto 30px auto;
+            width: 300px;
+        }
+
+        .card {
+            display: block;
+            margin: 50px auto;
+            width: 300px;
+        }
+
+        .content {
+            text-align: center;
+        }
+
+        /* 결과창 css */
+
+        #result_card {
+            display: none;
+        }
+
+        /* 결과값 css */
+
+        #real_result {
+            font-weight: bold;
+        }
+
+
+    </style>
+    <script>
+
+        function gotya(bigseg) {
+            var getvalue = $(bigseg).val();
+            console.log('getvalue : ' + getvalue)
+            if (getvalue == 'uSanSo') {
+                $('#SmallSegment').empty(); // 두번째 SELECT BOX 에 추가하기 전에 초기화 합니다.
+                uSanSo_list_up();
+            } else if (getvalue == 'health') {
+                $('#SmallSegment').empty();
+                health_list_up();
+            }
+            // 두번째 SELECT BOX 의 기본값이 숨김이라, 두번째 SELECT BOX 생성한 후 보여줍니다.
+            $('#SmallSegment').show()
+
+            // 전역변수 already_selected 로 운동 분류를 선택했는지 검사합니다.
+            already_selected = true;
+        };
+
+        // 내부 데이터 불러오기
+        function uSanSo_list_up() {
+            $.ajax({
+                type: "GET",
+                url: "/givemethat/uSanSo",
+                data: {},
+                success: function (response) {
+                    let uSanSo_list = response['uSanSo'];
+                    for (let i = 0; i < uSanSo_list.length; i++) {
+                        let exer_name = uSanSo_list[i]['exer_name'];
+                        $('#SmallSegment').append(`<option value=${exer_name}>${exer_name}</option>`)
+                    }
+                }
+            });
+        }
+
+        function health_list_up() {
+            $.ajax({
+                type: "GET",
+                url: "/givemethat/health",
+                data: {},
+                success: function (response) {
+                    let health_list = response['health'];
+                    for (let i = 0; i < health_list.length; i++) {
+                        let exer_name = health_list[i]['exer_name'];
+                        $('#SmallSegment').append(`<option value=${exer_name}>${exer_name}</option>`)
+                    }
+                }
+            })
+        }
+
+        function call_result() {
+            if (window.already_selected == true) {
+                let weight = $('#weight_give').val();
+                let cal = $('#cal_give').val();
+                let time = $('#time_give').val();
+                if (canyourunit(weight, cal, time) == false) {
+                    alert('숫자를 입력해주세요.');
+                } else {
+                    $.ajax({
+                        type: "POST",
+                        url: "/givemeresult",
+                        data: {exer_type_give: $('#BigSegment').val(), exer_name_give: $('#SmallSegment').val()},
+                        success: function (response) {
+                            let met = response['met']['met'];
+                            let result = (met * weight * time) / cal;
+                            let real_result = Math.round(result)
+                            $('#result').append(`<p><span id="real_result">${real_result}</span>만큼 운동해야합니다.</p>`);
+                            $('#result_card').show()
+                        }
+                    })
+                }
+            } else {
+                alert('먼저 운동을 선택해주세요.')
+            }
+        }
+
+        function canyourunit(...name) {
+            var regExp = /^[0-9]+$/;
+            for (let i = 0; i < name.length; i++) {
+                if (!regExp.test(name[i])) {
+                    return false;
+                }
+            }
+        };
+
+
+    </script>
+</head>
+<body>
+<nav class="level">
+    <p class="level-item has-text-centered">
+        <img src="https://velog.velcdn.com/images/ihowork/post/68efe03f-d8cd-430f-835c-6de3d4dd4c4a/image.png">
+    </p>
+
+    <div class="level-item has-text-centered">
+        <button class="button is-danger is-light" onclick="sign_out()">로그아웃</button>
+    </div>
+</nav>
+
+<section class="section">
+    <div class="container">
+        <h1 class="title">met지수란?</h1>
+        <h2 class="subtitle">
+            MET는 1분간 소비되는 단위 체중당 에너지 소비량(kcal)입니다.
+        </h2>
+    </div>
+</section>
+
+
+<div class="main_post">
+    <div class="form-group">
+        <select id="BigSegment" onchange="gotya(this)">
+            <option>운동분류 선택</option>
+            <option value="uSanSo">유산소</option>
+            <option value="health">헬스</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <select id="SmallSegment" style="display: none;" onchange="getya(this)">
+            <option>선택</option>
+        </select>
+    </div>
+    <div>
+        <input class="input is-normal" type="text" placeholder="체중을 입력해주세요" id="weight_give">
+        <input class="input is-normal" type="text" placeholder="시간을 입력해주세요" id="time_give">
+        <input class="input is-normal" type="text" placeholder="목표 칼로리를 입력해주세요" id="cal_give">
+        <button class="button is-primary is-active" onclick="call_result()">계산하기</button>
+    </div>
+    <div class="card" id="result_card">
+        <div class="card-content">
+            <div class="content">
+                <div id="result">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
