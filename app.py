@@ -28,6 +28,7 @@ db = client.testdb1
 def main():
     return render_template("login.html")
 
+
 @app.route('/detail')
 def detail():
     return render_template("project.html")
@@ -109,18 +110,15 @@ def check_dup():
 #####################################################
 
 
-@app.route('/givemethat/uSanSo', methods=["GET"])
-def give_uSanSo():
-    uSanSo = list(db.test2.find({}, {'exer_name': True, '_id': False}))
-    print(uSanSo)
-    return jsonify({'uSanSo': uSanSo})
-
-
-@app.route('/givemethat/health', methods=["GET"])
-def give_health():
-    health = list(db.test1.find({}, {'exer_name': True, '_id': False}))
-    print(health)
-    return jsonify({'health': health})
+@app.route('/givemethat', methods=["POST"])
+def give_exer_type():
+    exer_type = request.form['exer_type_give']
+    if exer_type == 'uSanSo':
+        usanso = list(db.test2.find({}, {'exer_name': True, '_id': False}))
+        return jsonify({'uSanSo': usanso})
+    elif exer_type == 'health':
+        health = list(db.test1.find({}, {'exer_name': True, '_id': False}))
+        return jsonify({'health': health})
 
 
 ## DB에 접근하여 알맞는 값을 보내주는 api 입니다.
@@ -131,10 +129,8 @@ def result():
     exer_type_receive = request.form['exer_type_give']
     if exer_type_receive == 'uSanSo':
         met = db.test2.find_one({'exer_name': exer_name_receive}, {'_id': False})
-        print(met)
     elif exer_type_receive == 'health':
         met = db.test1.find_one({'exer_name': exer_name_receive}, {'_id': False})
-        print(met)
     return jsonify({'met': met})
 
 
