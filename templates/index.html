@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Bulma 쓰는 법 연습하기</title>
+    <title>운동 칼로리 계산기</title>
 
     <!-- Bulma CSS 링크 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
@@ -21,13 +21,30 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
 
+    <!-- font -->
+    <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap" rel="stylesheet">
+
     <style>
+        * {
+            font-family: 'Do Hyeon', sans-serif;
+        }
+        .background {
+            background-image: url("https://img.freepik.com/free-vector/gym-for-fitness-and-workout-exercise-illustration-man-woman-people-character-training-sport-cartoon-healthy-lifestyle_109722-2008.jpg?w=2000");
+            background-repeat: no-repeat;
+            background-size: 100%;
+            height: 100vh;
+            background-position: top;
+        }
         .level-item {
             width: 95%;
-            max-width: 200px;
+            max-width: 300px;
             height: 95%;
-            max-height: 200px;
-            margin: auto 200px auto 400px;
+            max-height: 300px;
+            margin: auto 200px auto 800px;
+        }
+
+        .level-item1 {
+            margin-right: 300px;
         }
 
         .section {
@@ -35,6 +52,7 @@
             max-width: 100vw;
             margin: auto auto 50px auto;
             box-shadow: 0px 0px 3px 0px gray;
+            background-color: white;
         }
 
         .button {
@@ -49,10 +67,15 @@
             box-shadow: 0px 0px 3px 0px gray;
             padding-top: 50px;
             padding-bottom: 50px;
+            background-color: white;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
         }
 
-        .form-group {
-            margin: 10px auto;
+        .select_box {
             width: 300px;
         }
 
@@ -70,33 +93,34 @@
 
         .content {
             text-align: center;
-        }
+            display: flex;
 
-        /* 결과창 css */
+        }
 
         #result_card {
             display: none;
         }
-
-        /* 결과값 css */
-
-        #real_result {
-            font-weight: bold;
+        .result_box {
+            margin-left: 10px;
+            margin-right: 10px;
         }
-
 
     </style>
     <script>
 
+        // 첫번째 SELECT BOX를 선택했다면 그에 맞는 XX_list_up() 함수를 호출합니다.
         function gotya(bigseg) {
             var getvalue = $(bigseg).val();
             console.log('getvalue : ' + getvalue)
-            if (getvalue == 'uSanSo') {
-                $('#SmallSegment').empty(); // 두번째 SELECT BOX 에 추가하기 전에 초기화 합니다.
-                uSanSo_list_up();
+            if (getvalue == 'aerobic') {
+                $('#SmallSegment').empty(); // 두번째 SELECT BOX 에 추가하기 전에 초기화 합니다. !!
+                aerobic_list_up();
             } else if (getvalue == 'health') {
                 $('#SmallSegment').empty();
                 health_list_up();
+            } else if (getvalue == 'anaerobic') {
+                $('#SmallSegment').empty();
+                anaerobic_list_up();
             }
             // 두번째 SELECT BOX 의 기본값이 숨김이라, 두번째 SELECT BOX 생성한 후 보여줍니다.
             $('#SmallSegment').show()
@@ -105,63 +129,95 @@
             already_selected = true;
         };
 
-        // 내부 데이터 불러오기
-        function uSanSo_list_up() {
-            $.ajax({
-                type: "POST",
-                url: "/givemethat",
-                data: {exer_type_give: $('#BigSegment').val()},
-                success: function (response) {
-                    let uSanSo_list = response['uSanSo'];
-                    for (let i = 0; i < uSanSo_list.length; i++) {
-                        let exer_name = uSanSo_list[i]['exer_name'];
-                        $('#SmallSegment').append(`<option value=${exer_name}>${exer_name}</option>`)
-                    }
-                }
-            });
-        }
 
+        // 운동 분류가 정해지면, 그 분류에 맞는 운동 리스트를 두번째 SELECT BOX에 추가합니다.
+        // 아래의 XX_list_up() 함수는 동일한 기능을 수행합니다.
         function health_list_up() {
             $.ajax({
                 type: "POST",
-                url: "/givemethat",
+                url: "/api/sel_exer_type",
                 data: {exer_type_give: $('#BigSegment').val()},
                 success: function (response) {
-                    let health_list = response['health'];
-                    for (let i = 0; i < health_list.length; i++) {
-                        let exer_name = health_list[i]['exer_name'];
+                    let health_row = response['health'];
+                    for (let i = 0; i < health_row.length; i++) {
+                        let exer_name = health_row[i]['exer_name'];
                         $('#SmallSegment').append(`<option value=${exer_name}>${exer_name}</option>`)
                     }
                 }
             })
         }
 
+
+        function aerobic_list_up() {
+            $.ajax({
+                type: "POST",
+                url: "/api/sel_exer_type",
+                data: {exer_type_give: $('#BigSegment').val()},
+                success: function (response) {
+                    let aerobic_row = response['aerobic'];
+                    for (let i = 0; i < aerobic_row.length; i++) {
+                        let exer_name = aerobic_row[i]['exer_name'];
+                        $('#SmallSegment').append(`<option value=${exer_name}>${exer_name}</option>`)
+                    }
+                }
+            })
+        }
+
+
+        function anaerobic_list_up() {
+            $.ajax({
+                type: "POST",
+                url: "/api/sel_exer_type",
+                data: {exer_type_give: $('#BigSegment').val()},
+                success: function (response) {
+                    let anaerobic_row = response['anaerobic'];
+                    for (let i = 0; i < anaerobic_row.length; i++) {
+                        let exer_name = anaerobic_row[i]['exer_name'];
+                        $('#SmallSegment').append(`<option value=${exer_name}>${exer_name}</option>`)
+                    }
+                }
+            })
+        }
+
+
+        // 기입된 값과서버에서 받은 데이터로 결과값을 도출하는 함수입니다.
         function call_result() {
+
+            // 첫번째 SELECT BOX 에서 운동 분류를 선택했는지 검사합니다.
             if (window.already_selected == true) {
                 let weight = $('#weight_give').val();
-                let cal = $('#cal_give').val();
                 let time = $('#time_give').val();
-                if (canyourunit(weight, cal, time) == false) {
+
+                // 기입된 모든 값이 숫자를 제외한 다른 문자가 있는지 검사합니다.
+                if (canyourunit(weight, time) == false) {
                     alert('숫자를 입력해주세요.');
-                } else {
+                }
+                // 위의 모든 검사를 통과했다면, 결과창을 띄워줍니다.
+                else {
                     $.ajax({
                         type: "POST",
-                        url: "/givemeresult",
+                        url: "/api/get_exer_result",
                         data: {exer_type_give: $('#BigSegment').val(), exer_name_give: $('#SmallSegment').val()},
                         success: function (response) {
-                            let met = response['met']['met'];
-                            let result = (met * weight * time) / cal;
+                            let met = response['exer_info']['met'];
+                            let result = (0.0175 * met * weight * time);
                             let real_result = Math.round(result)
-                            $('#result').append(`<p><span id="real_result">${real_result}</span>만큼 운동해야합니다.</p>`);
+                            $('#result').empty();                                  // append 해주기 전, 초기화 합니다.
+                            $('#result').append(`<span>${real_result}</span>`);    // 결과값을 html 파일에 기입합니다.
                             $('#result_card').show()
                         }
                     })
                 }
-            } else {
+            }
+
+            // 첫번째 SELECT BOX 를 선택하지않고 계산하기 버튼을 눌렀을 때 알림을 띄웁니다.
+            else {
                 alert('먼저 운동을 선택해주세요.')
             }
         }
 
+
+        // 숫자만 기입했는지 검사하는 함수입니다.
         function canyourunit(...name) {
             var regExp = /^[0-9]+$/;
             for (let i = 0; i < name.length; i++) {
@@ -172,54 +228,71 @@
         };
 
 
+        // 로그아웃
+        function sign_out() {
+            $.removeCookie('mytoken', {path: '/'});
+            alert('로그아웃!')
+            window.location.href = "/"
+            }
+
     </script>
 </head>
-<body>
+<body class="background">
 <nav class="level">
+
     <p class="level-item has-text-centered">
-        <img src="https://velog.velcdn.com/images/ihowork/post/68efe03f-d8cd-430f-835c-6de3d4dd4c4a/image.png">
+        <img src="https://velog.velcdn.com/images/ihowork/post/c8bd56ba-7d0d-41be-a9ac-c9766b998d46/image.png">
     </p>
 
-    <div class="level-item has-text-centered">
-        <button class="button is-danger is-light" onclick="sign_out()">로그아웃</button>
+    <div class="level-item1 has-text-centered">
+        <button class="button is-danger" type="reset" onclick="sign_out()">로그아웃</button>
     </div>
 </nav>
 
 <section class="section">
     <div class="container">
-        <h1 class="title">met지수란?</h1>
+        <h1 class="title">MET지수란?</h1>
         <h2 class="subtitle">
-            MET는 1분간 소비되는 단위 체중당 에너지 소비량(kcal)입니다.
+            MET는 1분간 소비되는 단위 체중당 에너지 소비량(kcal)입니다.<br>
+            MET가 높은 운동일수록 많은 에너지가 소비됩니다.
         </h2>
     </div>
 </section>
 
 
 <div class="main_post">
-    <div class="form-group">
-        <select id="BigSegment" onchange="gotya(this)">
-            <option disabled selected>운동분류 선택</option>
-            <option value="uSanSo">유산소</option>
-            <option value="health">헬스</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <select id="SmallSegment" style="display: none;" onchange="getya(this)">
-            <option>선택</option>
-        </select>
-    </div>
+
+
+    <select class="form-select form-select-lg mb-3 select_box" id="BigSegment" aria-label=".form-select-lg example" onchange="gotya(this)">
+            <!-- option 자동화 기입을 onchange를 사용하여 시도해봤으나 실패..-->
+            <option disabled selected >운동분류 선택</option>
+            <option value="pt">PT</option>
+            <option value="aerobic">aerobic</option>
+            <option value="anaerobic">anaerobic</option>
+
+    </select>
+    <select class="form-select form-select-lg mb-3 select_box" id="SmallSegment" aria-label=".form-select-lg example" style="display: none;">
+            <option disabled selected>선택</option>
+    </select>
+
+
     <div>
-        <input class="input is-normal" type="text" placeholder="체중을 입력해주세요" id="weight_give">
-        <input class="input is-normal" type="text" placeholder="시간을 입력해주세요" id="time_give">
-        <input class="input is-normal" type="text" placeholder="목표 칼로리를 입력해주세요" id="cal_give">
-        <button class="button is-primary is-active" onclick="call_result()">계산하기</button>
+        <input class="input is-normal" type="text" placeholder="체중을 입력해주세요. (Kg)" id="weight_give">
+        <input class="input is-normal" type="text" placeholder="시간을 입력해주세요. (분)" id="time_give">
+        <button class="button is-black is-active" onclick="call_result()">계산하기</button>
     </div>
     <div class="card" id="result_card">
         <div class="card-content">
             <div class="content">
-                <div id="result">
+                <p>예상 소모 칼로리는 </p>
+                <div class="result_box" id="result">
 
                 </div>
+
+                <p>Kcal 입니다.</p>
+            </div>
+            <div>
+                <p>Made by : {{ made_by }}</p>
             </div>
         </div>
     </div>

@@ -36,7 +36,7 @@ def detail():
 
 @app.route('/main')
 def main_page():
-    return render_template('index.html')
+    return render_template('index.html', made_by="7기 14조")
 
 
 #####################################################
@@ -110,28 +110,36 @@ def check_dup():
 #####################################################
 
 
-@app.route('/givemethat', methods=["POST"])
-def give_exer_type():
+@app.route('/api/sel_exer_type', methods=["POST"])
+def exer_type():
     exer_type = request.form['exer_type_give']
-    if exer_type == 'uSanSo':
-        usanso = list(db.test2.find({}, {'exer_name': True, '_id': False}))
-        return jsonify({'uSanSo': usanso})
+    if exer_type == 'pt':
+        pt = list(db.pt_list.find({}, {'exer_name': True, '_id': False}))
+        return jsonify({'pt': pt})
     elif exer_type == 'health':
-        health = list(db.test1.find({}, {'exer_name': True, '_id': False}))
+        health = list(db.health_list.find({}, {'exer_name': True, '_id': False}))
         return jsonify({'health': health})
+    elif exer_type == 'aerobic':
+        aerobic = list(db.aerobic_list.find({}, {'exer_name': True, '_id': False}))
+        return jsonify({'aerobic': aerobic})
+    elif exer_type == 'anaerobic':
+        anaerobic = list(db.anaerobic_list.find({}, {'exer_name': True, '_id': False}))
+        return jsonify({'anaerobic': anaerobic})
 
 
 ## DB에 접근하여 알맞는 값을 보내주는 api 입니다.
 
-@app.route('/givemeresult', methods=["POST"])
+@app.route('/api/get_exer_result', methods=["POST"])
 def result():
     exer_name_receive = request.form['exer_name_give']
     exer_type_receive = request.form['exer_type_give']
-    if exer_type_receive == 'uSanSo':
-        met = db.test2.find_one({'exer_name': exer_name_receive}, {'_id': False})
-    elif exer_type_receive == 'health':
-        met = db.test1.find_one({'exer_name': exer_name_receive}, {'_id': False})
-    return jsonify({'met': met})
+    if exer_type_receive == 'pt':
+        exer_info = db.pt_list.find_one({'exer_name': exer_name_receive}, {'_id': False})
+    elif exer_type_receive == 'anaerobic':
+        exer_info = db.anaerobic_list.find_one({'exer_name': exer_name_receive}, {'_id': False})
+    elif exer_type_receive == 'aerobic':
+        exer_info = db.aerobic_list.find_one({'exer_name': exer_name_receive}, {'_id': False})
+    return jsonify({'exer_info': exer_info})
 
 
 if __name__ == '__main__':
